@@ -1,6 +1,6 @@
 {
   "name": "@pdyxs/re-connect-firestore",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Object Model handling for firestore",
   "main": "dist/index.js",
   "license": "APACHE",
