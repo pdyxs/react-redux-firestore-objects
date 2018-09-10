@@ -17,8 +17,8 @@ import {
 
 import _ from 'lodash';
 
-const OBJECT = '_o';
-const OBJECTS = '_O';
+const OBJECT = 'Object';
+const OBJECTS = 'Objects';
 const BY_ID = '_id';
 
 function getRequiredConnections(spec, options) {
@@ -37,7 +37,7 @@ function connectObjectsToClass(spec, options) {
   var name = spec.name + OBJECTS;
   var connect = withProps((props) => {
     var ret = {};
-    ret[name] = _.map(props[spec.listName], o => new spec.class(o));
+    ret[name] = _.map(props[spec.listName], o => new spec.class(o, props));
     return ret;
   });
   if (!options.overrideCheck)
@@ -84,7 +84,6 @@ export function connectObjects(spec, options = {}) {
   }
 
   var connector = compose(
-    ...getRequiredConnections(spec, options),
     connectFirestore((props) => ([{
       ...spec.getCollection(props),
       orderBy: spec.orderBy,
@@ -102,6 +101,7 @@ export function connectObjects(spec, options = {}) {
   if (!options.overrideCheck)
   {
     return compose(
+      ...getRequiredConnections(spec, options),
       checkIfInPropsContextOrOrdered(
         {
           name: spec.listName,
