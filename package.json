@@ -14,8 +14,8 @@
     "url": "https://github.com/pdyxs/reconnect-firestore.git"
   },
   "dependencies": {
-    "@pdyxs/re-connect": "0.0.3",
-    "@pdyxs/re-connect-firebase": "0.0.1",
+    "@pdyxs/re-connect": "^0.1.0",
+    "@pdyxs/re-connect-firebase": "^0.1.0",
     "babel-core": "^6.0.20",
     "babel-eslint": "^7.1.0",
     "babel-loader": "^6.2.10",
@@ -30,13 +30,13 @@
     "flow-bin": "^0.37.4",
     "lodash": "^4.17.10",
     "prop-type": "0.0.1",
-    "re-extinguish": "0.0.2",
+    "re-extinguish": "^0.1.0",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-redux": "^5.0.7",
     "recompose": "^0.30.0",
     "redux": "^4.0.0",
-    "reramble": "0.0.1",
+    "reramble": "^0.1.0",
     "rimraf": "^2.5.4",
     "webpack": "^2.2.0"
   },
