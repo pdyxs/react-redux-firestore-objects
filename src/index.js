@@ -1,5 +1,6 @@
 import UndoSpecs, { removeObject, addObject, editObject } from './undoables';
 import { connectObjects, connectObject, getObjectHandlers } from './connect';
+import FirestoreObject from './FirestoreObject';
 
 export {
   UndoSpecs,
@@ -8,5 +9,6 @@ export {
   editObject,
   connectObjects,
   connectObject,
-  getObjectHandlers
+  getObjectHandlers,
+  FirestoreObject
 }
