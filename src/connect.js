@@ -8,8 +8,8 @@ import { withName } from 'reramble';
 import {
   checkIfPropsOrContextContains,
   checkIfInPropsContextOrOrdered,
-  connectRouter
 } from '@pdyxs/re-connect';
+import { withRouter } from 'react-router-dom';
 import {
   connectStore,
   connectFirestore
@@ -17,8 +17,6 @@ import {
 
 import _ from 'lodash';
 
-const OBJECT = 'Object';
-const OBJECTS = 'Objects';
 const BY_ID = '_id';
 
 function getRequiredConnections(spec, options) {
@@ -29,39 +27,14 @@ function getRequiredConnections(spec, options) {
   return requiredComposables;
 }
 
-function connectObjectsToClass(spec, options) {
-  if (!spec.class) {
-    return compose();
-  }
-
-  var name = spec.name + OBJECTS;
-  var connect = withProps((props) => {
-    var ret = {};
-    ret[name] = _.map(props[spec.listName], o => new spec.class(o, props));
-    return ret;
-  });
-  if (!options.overrideCheck)
-  {
-    return checkIfPropsOrContextContains({
-        name: name,
-        type: PropTypes.array
-      },
-      connect
-    );
-  }
-  return connect;
-}
-
 function connectObjectsById(spec, options) {
   var name = spec.listName + BY_ID;
-  var objectName = spec.class ? spec.name + OBJECTS : spec.listName;
   var connect = withProps((props) => {
     var ret = {};
-    ret[name] = _.fromPairs(_.map(props[objectName], o => [o.id, o]));
+    ret[name] = _.fromPairs(_.map(props[spec.listName], o => [o.id, o]));
     return ret;
   });
-  if (!options.overrideCheck)
-  {
+  if (!options.overrideCheck) {
     return checkIfPropsOrContextContains({
         name: name,
         type: PropTypes.object
@@ -94,13 +67,19 @@ export function connectObjects(spec, options = {}) {
   var mapStateToProps = ({firestore: {ordered}}, props) => {
     let ret = {};
     var sname = storedName(props);
-    ret[spec.listName] = ordered[sname];
+    if (spec.class) {
+      ret[spec.listName] = _.map(ordered[sname],
+        o => new spec.class(o, props));
+    } else {
+      ret[spec.listName] = ordered[sname];
+    }
     return ret;
   };
 
   if (!options.overrideCheck)
   {
     return compose(
+      withRouter,
       ...getRequiredConnections(spec, options),
       checkIfInPropsContextOrOrdered(
         {
@@ -111,26 +90,24 @@ export function connectObjects(spec, options = {}) {
         connector,
         mapStateToProps
       ),
-      connectObjectsToClass(spec, options),
       connectObjectsById(spec, options)
     );
   }
 
   return compose(
+    withRouter,
+    ...getRequiredConnections(spec, options),
     connector,
     connect(mapStateToProps),
-    connectObjectsToClass(spec, options),
     connectObjectsById(spec, options)
   );
 }
 
 export function connectObject(spec, options = {}) {
   let getters = [
+    withRouter,
     connectObjects(spec, options)
   ];
-  if (!options.idPropName) {
-    getters.push(connectRouter());
-  }
   getters = getters.concat(
     withName(`${spec.name} from ${spec.listName}`),
     withProps((props) => {
@@ -147,30 +124,25 @@ export function connectObject(spec, options = {}) {
       }
 
       if (props[spec.listName]) {
-        if (spec.class) {
-          ret[spec.name + OBJECT] = props[spec.listName + BY_ID][targetid];
-          ret[spec.name] = ret[spec.name + OBJECT] ? ret[spec.name + OBJECT].data : null;
-        } else {
-          ret[spec.name] = props[spec.listName + BY_ID][targetid];
-        }
+        ret[spec.name] = props[spec.listName + BY_ID][targetid];
       }
       return ret;
     })
   );
 
-  if (options.overrideCheck) {
+  // if (options.overrideCheck) {
     return compose(...getters);
-  }
-  return checkIfPropsOrContextContains(
-    {
-      name: spec.name,
-      type: PropTypes.object,
-      dontSave: options.dontSave || options.idPropName
-    },
-    compose(
-      ...getters
-    )
-  );
+  // }
+  // return checkIfPropsOrContextContains(
+  //   {
+  //     name: spec.name,
+  //     type: PropTypes.object,
+  //     dontSave: options.dontSave || options.idPropName
+  //   },
+  //   compose(
+  //     ...getters
+  //   )
+  // );
 }
 
 export const ON_ADD = 'onAdd';
@@ -206,8 +178,8 @@ export function getObjectHandlers(spec, options = {}) {
   });
 
   return compose(
+    withRouter,
     ...getRequiredConnections(spec, options),
-    connectRouter(),
     withName(`${spec.name} handlers`),
     connectStore(),
     // connectUndo(),
